@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peta Interaktif dengan Leaflet JS</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <header>
+        <h1>🌍 Peta Wisata Jakarta</h1>
+        <p>Tutorial Leaflet JS + GitHub Pages</p>
+    </header>
+
+    <main>
+        <div class="container">
+            <div id="map">
+                <div class="map-loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button onclick="zoomToLocation()" disabled aria-label="Zoom ke Monas" data-icon="🎯">
+                    🎯 Zoom ke Monas
+                </button>
+                <button onclick="addRandomMarker()" disabled aria-label="Tambah marker acak" data-icon="📍">
+                    📍 Tambah Marker
+                </button>
+                <button onclick="clearMarkers()" disabled aria-label="Hapus semua marker" data-icon="🗑️">
+                    🗑️ Hapus Marker
+                </button>
+                <button onclick="locateMe()" disabled aria-label="Cari lokasi saya" data-icon="📍">
+                    📍 Lokasi Saya
+                </button>
+            </div>
+            
+            <div class="info">
+                <h3>Fitur yang Ditampilkan:</h3>
+                <ul>
+                    <li>✅ Peta dasar OpenStreetMap</li>
+                    <li>✅ Marker dengan popup</li>
+                    <li>✅ Circle dan polygon</li>
+                    <li>✅ Event handlers</li>
+                    <li>✅ Custom controls</li>
+                    <li>✅ Geolocation API</li>
+                    <li>✅ Responsive design</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Dibuat dengan ❤️ menggunakan Leaflet JS</p>
+    </footer>
+
+    <script>
+        // Variabel global
+        let map;
+        let markers = [];
+        let monas = [-6.1754, 106.8272]; // Koordinat Monas
+
+        // Helper function untuk notifikasi toast
+        function showToast(message, type = 'success') {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<div class="toast-message">${message}</div>`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideInRight 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Inisialisasi peta ketika halaman loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMap();
+        });
+
+        function initializeMap() {
+            // Inisialisasi peta dengan view di Monas
+            map = L.map('map').setView(monas, 13);
+
+            // Tambahkan tile layer dari OpenStreetMap (sebagai basemap default)
+            const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Contoh basemap alternatif
+            const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://opentopomap.org">OpenTopoMap</a> contributors'
+            });
+
+            // Layer control untuk mengganti basemap
+            const baseLayers = {
+                "OpenStreetMap": osm,
+                "OpenTopoMap": topo
+            };
+            L.control.layers(baseLayers).addTo(map);
+
+            // Scale control (metrik saja)
+            L.control.scale({ metric: true, imperial: false }).addTo(map);
+
+            // Setelah map siap, aktifkan tombol kontrol di UI
+            document.querySelectorAll('.controls button').forEach(b => b.disabled = false);
+
+            // Tambahkan marker Monas
+            let monasMarker = L.marker(monas)
+                .addTo(map)
+                .bindPopup(`
+                    <h3>Monumen Nasional (Monas)</h3>
+                    <p>Icon kebanggaan Jakarta dengan tinggi 132 meter</p>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Monas_Jakarta.jpg/200px-Monas_Jakarta.jpg" width="150" alt="Foto Monas">
+                    <br><small>Sumber: Wikipedia</small>
+                `)
+                .openPopup();
+
+            markers.push(monasMarker);
+
+            // Tambahkan circle di sekitar Monas
+            L.circle(monas, {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.1,
+                radius: 1000
+            }).addTo(map).bindPopup("Area 1km sekitar Monas");
+
+            // Tambahkan polygon (segitiga)
+            let polygon = L.polygon([
+                [-6.1854, 106.8172],
+                [-6.1654, 106.8172],
+                [-6.1754, 106.8372]
+            ], {
+                color: 'blue',
+                fillColor: '#00f',
+                fillOpacity: 0.1
+            }).addTo(map).bindPopup("Area Segitiga");
+
+            // Event handler untuk klik pada peta
+            map.on('click', function(e) {
+                let newMarker = L.marker(e.latlng)
+                    .addTo(map)
+                    .bindPopup(`Lokasi: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`)
+                    .openPopup();
+                
+                markers.push(newMarker);
+            });
+
+            // Tambahkan beberapa landmark Jakarta
+            addJakartaLandmarks();
+        }
+
+        function addJakartaLandmarks() {
+            const landmarks = [
+                {
+                    name: "Kota Tua",
+                    coords: [-6.1352, 106.8133],
+                    description: "Kawasan sejarah Jakarta dengan arsitektur kolonial"
+                },
+                {
+                    name: "TMII",
+                    coords: [-6.3024, 106.8952],
+                    description: "Taman Mini Indonesia Indah"
+                },
+                {
+                    name: "Ancol",
+                    coords: [-6.1256, 106.8380],
+                    description: "Kawasan wisata pantai dan Dunia Fantasi"
+                }
+            ];
+
+            landmarks.forEach(landmark => {
+                let marker = L.marker(landmark.coords)
+                    .addTo(map)
+                    .bindPopup(`
+                        <h4>${landmark.name}</h4>
+                        <p>${landmark.description}</p>
+                    `);
+                markers.push(marker);
+            });
+        }
+
+        function zoomToLocation() {
+            map.setView(monas, 16);
+            showToast('🎯 Berhasil zoom ke Monas!');
+        }
+
+        function addRandomMarker() {
+
+            let lat = monas[0] + (Math.random() - 0.5) * 0.1;
+            let lng = monas[1] + (Math.random() - 0.5) * 0.1;
+            
+            let randomMarker = L.marker([lat, lng])
+                .addTo(map)
+                .bindPopup(`Marker Acak<br>${lat.toFixed(4)}, ${lng.toFixed(4)}`)
+                .openPopup();
+            
+            markers.push(randomMarker);
+            showToast('📍 Marker baru berhasil ditambahkan!');
+        }
+
+        function clearMarkers() {
+            const count = markers.length;
+            markers.forEach(marker => {
+                map.removeLayer(marker);
+            });
+            markers = [];
+            showToast(`🗑️ Berhasil menghapus ${count} marker!`);
+        }
+
+        function locateMe() {
+            if (!map) {
+                return alert('Peta belum siap');
+            }
+
+            // Minta izin lokasi dan set view jika berhasil
+            map.locate({ setView: true, maxZoom: 16 });
+
+            map.once('locationfound', function(e) {
+                const radius = e.accuracy || 50;
+                const locMarker = L.marker(e.latlng)
+                    .addTo(map)
+                    .bindPopup(`Anda di sini (${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)})`)
+                    .openPopup();
+
+                L.circle(e.latlng, {
+                    radius: radius,
+                    color: '#136aec',
+                    fillColor: '#136aec',
+                    fillOpacity: 0.1
+                }).addTo(map);
+
+                markers.push(locMarker);
+            });
+
+            map.once('locationerror', function(e) {
+                alert('Tidak dapat menentukan lokasi: ' + e.message);
+            });
+        }
+    </script>
+</body>
+</html>

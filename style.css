@@ -1,0 +1,553 @@
+/* Reset dasar */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --dark-bg: #1a1a2e;
+    --card-bg: rgba(255, 255, 255, 0.1);
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --text-dark: #2c3e50;
+    --text-light: #ecf0f1;
+    --text-muted: #7f8c8d;
+    --accent: #667eea;
+    --accent-hover: #5568d3;
+    --success: #2ecc71;
+    --danger: #e74c3c;
+    --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.2);
+    --border-radius: 16px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    background: var(--primary-gradient);
+    background-attachment: fixed;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Header dengan glassmorphism */
+header {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 2rem 1rem;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+header h1 {
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    font-weight: 700;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+header p {
+    color: var(--text-muted);
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    font-weight: 400;
+}
+
+/* Main container - responsive flex layout */
+.container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Desktop layout - map and controls side by side */
+@media (min-width: 768px) {
+    .container {
+        grid-template-columns: 1fr 280px;
+        align-items: start;
+    }
+}
+
+/* Map container dengan glassmorphism dan shadow */
+#map {
+    width: 100%;
+    height: 450px;
+    min-height: 450px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    transition: var(--transition);
+    position: relative;
+}
+
+@media (min-width: 768px) {
+    #map {
+        height: 600px;
+        min-height: 600px;
+    }
+}
+
+@media (min-width: 1024px) {
+    #map {
+        height: 70vh;
+        min-height: 500px;
+    }
+}
+
+#map:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
+}
+
+/* Loading overlay for map */
+.map-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeOut 0.5s ease-out 1s forwards;
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+/* Controls panel - modern card design */
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Modern button design */
+.controls button {
+    padding: 0.875rem 1.25rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: var(--transition);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Button hover effect */
+.controls button:hover:not(:disabled) {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.controls button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Button disabled state */
+.controls button:disabled {
+    background: #cbd5e0;
+    color: #a0aec0;
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.6;
+}
+
+/* Button ripple effect */
+.controls button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.controls button:active:not(:disabled)::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Button icons (using emoji as icons for now) */
+.controls button::after {
+    content: attr(data-icon);
+    font-size: 1.1rem;
+}
+
+/* Info card - modern design */
+.info {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    margin-top: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: fadeIn 0.8s ease-out;
+}
+
+@media (min-width: 768px) {
+    .info {
+        grid-column: 1 / -1;
+        margin-top: 0;
+    }
+}
+
+.info h3 {
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info h3::before {
+    content: '✨';
+    font-size: 1.5rem;
+}
+
+.info ul {
+    list-style: none;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.info li {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    color: var(--text-dark);
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info li:hover {
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateX(5px);
+}
+
+/* Footer modern */
+footer {
+    background: rgba(26, 26, 46, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--text-light);
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 3rem;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+/* Responsive design - Mobile first */
+@media (max-width: 767px) {
+    header {
+        padding: 1.5rem 1rem;
+    }
+    
+    header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .container {
+        padding: 0 0.75rem;
+        gap: 1rem;
+    }
+    
+    #map {
+        height: 400px;
+        min-height: 400px;
+        border-width: 2px;
+    }
+    
+    .controls {
+        padding: 1rem;
+        order: -1; /* Controls appear above map on mobile */
+    }
+    
+    .controls button {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .info {
+        padding: 1rem;
+    }
+    
+    .info li {
+        font-size: 0.9rem;
+        padding: 0.6rem 0.8rem;
+    }
+}
+
+/* Tablet optimization */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .container {
+        grid-template-columns: 1fr 240px;
+        gap: 1.25rem;
+    }
+    
+    #map {
+        height: 500px;
+    }
+}
+
+/* Large desktop */
+@media (min-width: 1440px) {
+    .container {
+        max-width: 1600px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .controls button {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        min-height: 48px; /* WCAG touch target size */
+    }
+    
+    #map {
+        touch-action: pan-x pan-y;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .controls button {
+        border: 2px solid currentColor;
+    }
+    
+    .info li {
+        border-left-width: 4px;
+    }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Leaflet custom styles - Enhanced */
+.leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.leaflet-popup-content {
+    margin: 1rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    line-height: 1.5;
+}
+
+.leaflet-popup-content h3 {
+    color: var(--text-dark);
+    margin-bottom: 0.75rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.leaflet-popup-content h4 {
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.leaflet-popup-content p {
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.leaflet-popup-content img {
+    border-radius: 8px;
+    margin: 0.5rem 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.leaflet-popup-tip {
+    box-shadow: var(--shadow-sm);
+}
+
+/* Leaflet controls styling */
+.leaflet-control-layers,
+.leaflet-control-scale,
+.leaflet-control-zoom {
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-control-zoom a {
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.leaflet-control-zoom a:hover {
+    background: var(--accent);
+    color: white;
+}
+
+/* Loading spinner */
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(102, 126, 234, 0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Notification toast */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    border-left: 4px solid var(--success);
+    z-index: 10000;
+    animation: slideInRight 0.3s ease-out;
+    max-width: 300px;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast.error {
+    border-left-color: var(--danger);
+}
+
+.toast-message {
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Selection styling */
+::selection {
+    background: var(--accent);
+    color: white;
+}
+
+::-moz-selection {
+    background: var(--accent);
+    color: white;
+}
