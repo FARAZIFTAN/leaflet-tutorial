@@ -16,4 +16,4 @@ Repository ini berisi contoh implementasi peta interaktif menggunakan Leaflet JS
 
 1. Clone repository ini:
 ```bash
-git clone https://github.com/username/leaflet-tutorial.git
+git clone https://github.com/FARAZIFTAN/leaflet-tutorial
