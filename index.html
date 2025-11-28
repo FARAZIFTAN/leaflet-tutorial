@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Peta Interaktif dengan Leaflet JS</title>
     
+    <!-- Font Awesome for better icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
@@ -18,9 +21,20 @@
     <header>
         <h1>🌍 Peta Wisata Jakarta</h1>
         <p>Tutorial Leaflet JS + GitHub Pages</p>
+        <div class="header-controls">
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="hamburger" onclick="toggleControls()" aria-label="Toggle controls">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
     </header>
 
     <main>
+        <div class="particles"></div>
         <div class="container">
             <div id="map">
                 <div class="map-loading">
@@ -30,16 +44,16 @@
             
             <div class="controls">
                 <button onclick="zoomToLocation()" disabled aria-label="Zoom ke Monas" data-icon="🎯">
-                    🎯 Zoom ke Monas
+                    <i class="fas fa-crosshairs"></i> Zoom ke Monas
                 </button>
                 <button onclick="addRandomMarker()" disabled aria-label="Tambah marker acak" data-icon="📍">
-                    📍 Tambah Marker
+                    <i class="fas fa-map-marker-alt"></i> Tambah Marker
                 </button>
                 <button onclick="clearMarkers()" disabled aria-label="Hapus semua marker" data-icon="🗑️">
-                    🗑️ Hapus Marker
+                    <i class="fas fa-trash"></i> Hapus Marker
                 </button>
                 <button onclick="locateMe()" disabled aria-label="Cari lokasi saya" data-icon="📍">
-                    📍 Lokasi Saya
+                    <i class="fas fa-location-arrow"></i> Lokasi Saya
                 </button>
             </div>
             
@@ -67,6 +81,7 @@
         let map;
         let markers = [];
         let monas = [-6.1754, 106.8272]; // Koordinat Monas
+        const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3001/api/locations' : 'https://faraziftan-ocxjleqhu-mahasiswaulbiit-1703s-projects.vercel.app/api/locations';
 
         // Helper function untuk notifikasi toast
         function showToast(message, type = 'success') {
@@ -88,8 +103,43 @@
 
         // Inisialisasi peta ketika halaman loaded
         document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.querySelector('.theme-toggle i').className = 'fas fa-sun';
+            }
             initializeMap();
+            fetchMarkersFromBackend();
         });
+
+        async function fetchMarkersFromBackend() {
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+                data.forEach(item => {
+                    if (item.lat && item.lng) {
+                        const m = L.marker([item.lat, item.lng])
+                            .addTo(map)
+                            .bindPopup(item.description || `Lat: ${item.lat}, Lng: ${item.lng}`);
+                        markers.push(m);
+                    }
+                });
+            } catch (err) {
+                showToast('Gagal mengambil data marker dari server', 'error');
+            }
+        }
+
+        async function saveMarkerToBackend(lat, lng, description = '') {
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lat, lng, description })
+                });
+            } catch (err) {
+                showToast('Gagal simpan marker ke server', 'error');
+            }
+        }
 
         function initializeMap() {
             // Inisialisasi peta dengan view di Monas
@@ -151,13 +201,14 @@
             }).addTo(map).bindPopup("Area Segitiga");
 
             // Event handler untuk klik pada peta
-            map.on('click', function(e) {
+            map.on('click', async function(e) {
                 let newMarker = L.marker(e.latlng)
                     .addTo(map)
                     .bindPopup(`Lokasi: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`)
                     .openPopup();
-                
                 markers.push(newMarker);
+                await saveMarkerToBackend(e.latlng.lat, e.latlng.lng, 'Marker dari klik peta');
+                showToast('📍 Marker baru berhasil ditambahkan & disimpan!');
             });
 
             // Tambahkan beberapa landmark Jakarta
@@ -199,18 +250,16 @@
             showToast('🎯 Berhasil zoom ke Monas!');
         }
 
-        function addRandomMarker() {
-
+        async function addRandomMarker() {
             let lat = monas[0] + (Math.random() - 0.5) * 0.1;
             let lng = monas[1] + (Math.random() - 0.5) * 0.1;
-            
             let randomMarker = L.marker([lat, lng])
                 .addTo(map)
                 .bindPopup(`Marker Acak<br>${lat.toFixed(4)}, ${lng.toFixed(4)}`)
                 .openPopup();
-            
             markers.push(randomMarker);
-            showToast('📍 Marker baru berhasil ditambahkan!');
+            await saveMarkerToBackend(lat, lng, 'Marker Acak');
+            showToast('📍 Marker baru berhasil ditambahkan & disimpan!');
         }
 
         function clearMarkers() {
@@ -250,6 +299,26 @@
             map.once('locationerror', function(e) {
                 alert('Tidak dapat menentukan lokasi: ' + e.message);
             });
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.querySelector('.theme-toggle i');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                themeIcon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        function toggleControls() {
+            const controls = document.querySelector('.controls');
+            controls.classList.toggle('open');
         }
     </script>
 </body>
